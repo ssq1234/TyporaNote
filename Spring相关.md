@@ -50,7 +50,6 @@ log.info("")
 
 ```java
 @Value("${server.port}")
-
 private int port;
 ```
 

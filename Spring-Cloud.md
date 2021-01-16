@@ -1,5 +1,6 @@
+
+
 > # **SpringCloud**
->
 
 ## **一.版本兼容**
 
@@ -73,21 +74,17 @@ eureka.client.register-with-eureka=false
 
 
 
-**关闭eureka自我保护机制（不建议**）（15分钟内心跳比例小于85% 服务将会被保护起来 避免出现网络波动阻塞等问题误以为服务宕机）**
+> **关闭eureka自我保护机制（不建议**）（15分钟内心跳比例小于85% 服务将会被保护起来 避免出现网络波动阻塞等问题误以为服务宕机）**
 
 ![yd3](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd3.png)
 
-**启动类上加注解**
+> **启动类上加注解**说明自己是注册中心
 
 ```java
 @EnableEurekaServer
 ```
 
-
-
-*说明自己是注册中心**
-
-**访问对应端口进入eureka管理**
+> **访问对应端口进入eureka管理**
 
 #### **(2)配置client**
 
@@ -121,11 +118,12 @@ eureka.client.service-url.defaultZone = http://localhost:8761/eureka
 
 #### **(1)服务端配置**
 
-配置环境变量为  文件位置
-
-目录进入cmd 运行 consul agent -dev
-
-配置完成后访问8500端口
+> 配置环境变量为  文件位置
+>
+> 目录进入cmd 运行 consul agent -dev
+>
+> 配置完成后访问8500端口
+>
 
 #### **(2)客户端配置**
 
@@ -141,7 +139,8 @@ eureka.client.service-url.defaultZone = http://localhost:8761/eureka
         </dependency>
 ```
 
-同时需要引入spring-cloud依赖
+> 同时需要引入spring-cloud依赖
+>
 
 ```properties
 server.port=8889
@@ -160,7 +159,8 @@ spring.cloud.consul.discovery.service-name=${spring.application.name}
 
 ![yd4](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd4.png)
 
-Eureka（AP）  Consul（CP） Zookeeper（CP）
+> Eureka（AP）  Consul（CP） Zookeeper（CP）
+>
 
 ## **四.服务间的调用**
 
@@ -209,7 +209,7 @@ System.**out**.println(products1.getPort());
 
 #### **(3).@LoadBalanced**  **带有****Ribbon轮询****负载均衡的****RestTemplate****对象**
 
-**编写配置类**
+> **编写配置类**
 
 ```java
 @Configuration
@@ -226,7 +226,7 @@ public class RestTemplateConfig {
 
 
 
-**使用**
+> **使用**
 
 ```java
 String forObject1 = restTemplate.getForObject("http://项目名称/product/showMsg", String.class);
@@ -240,7 +240,7 @@ String forObject1 = restTemplate.getForObject("http://项目名称/product/showM
 
 #### **(5).修改负载均衡策略**
 
-**调用需要负载均衡服务名称.ribbon.NFLoadBalancerRuleclassName** =**com.netflix.loadbalancer.RandomRule****（策略类）  （IRule  ctrl+h 查看有哪些策略实现类****）**
+> **调用需要负载均衡服务名称.ribbon.NFLoadBalancerRuleclassName** =**com.netflix.loadbalancer.RandomRule****（策略类）  （IRule  ctrl+h 查看有哪些策略实现类****）**
 
 ### **3.OpenFeign**
 
@@ -297,9 +297,10 @@ Map<String, Object> one = productClient.findOne(id);
 
 #### **(6).POST方式参数传递**
 
-一个参数时和GET是一致的
-
-当参数为对象时全部需要加上
+> 一个参数时和GET是一致的
+>
+> 当参数为对象时全部需要加上
+>
 
 ```java
 @RequestBody
@@ -313,11 +314,13 @@ Map<String, Object> one = productClient.findOne(id);
 
 #### **(7).超时设置**
 
-OpenFeign 默认请求超过一秒  算为请求失败
+> OpenFeign 默认请求超过一秒  算为请求失败
+>
 
 ![yd9](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd9.png)
 
-据说标注字体后续版本必须为大写
+> 据说标注字体后续版本必须为大写
+>
 
 #### **(8).日志**
 
@@ -331,7 +334,7 @@ OpenFeign 默认请求超过一秒  算为请求失败
 
 ![yd11](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd11.png)
 
-#### **(2).****雪崩的解决方案****服务熔断（自动 站在链路层面）**
+#### (2).雪崩的解决方案服务熔断（自动 站在链路层面）
 
 ![yd12](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd12.png)
 
@@ -339,4 +342,127 @@ OpenFeign 默认请求超过一秒  算为请求失败
 
 ![yd13](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/yd13.png)
 
-服务熔断时服务降级的一个小分支，所以熔断必触发降级。
+> 服务熔断时服务降级的一个小分支，所以熔断必触发降级。
+
+#### (4).引入Hystrix
+
+```xml
+<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+</dependency>
+```
+
+```java
+@EnableCircuitBreaker  //启动类加注解
+```
+
+#### (5).服务熔断使用
+
+```java
+	@GetMapping("/product/break")
+    //@HystrixCommand(fallbackMethod = "testBreakFallBack")
+	@HystrixCommand(defaultFallback = "testBreakFallBack1")
+    public String testBreak(Integer id) {
+        if (id < 0) {
+            throw new RuntimeException("id不能小于0");
+        }
+        return "访问成功,id:" + id;
+    }
+    //触发熔断的方法
+    public String testBreakFallBack(Integer id){
+        return "当前传入的id不是有效参数,触发熔断";
+    }
+	//默认触发熔断的方法
+    public String testBreakFallBack1(){
+        return "当前传入的id不是有效参数,触发熔断";
+    }
+```
+
+![image-20210116173236537](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210116173236537.png)
+
+> yu值
+
+#### (6).服务降级使用
+
+> 首先注意服务端的熔断优先级要高于客户端的熔断，一定要保证两处熔断的返回类型相同
+
+> 加入配置
+
+```properties
+feign.hystrix.enabled=true
+```
+
+```java
+@FeignClient(value = "products",fallback = ProductClientFallBack.class)   //加入fallback 
+//而fallbackfactory有异常信息
+//类一定是当前接口的实现类且一定要注入到Spring工厂
+public interface ProductClient {
+    @GetMapping("/product/break")
+    public Map<String, Object> testBreak(@RequestParam("id") Integer id);
+}
+```
+
+```java
+@Component
+public class ProductClientFallBack implements ProductClient{
+    @Override
+    public Map<String, Object> testBreak(Integer id) {
+        Map<String, Object> r = new HashMap<>();
+        r.put("status","false");
+        r.put("msg","当前服务已被降级");
+        return r;
+    }
+}
+```
+
+#### (7).仪表盘
+
+> 新建仪表盘项目使用仪表盘
+
+## 六.微服务网关
+
+### 1.GateWay组件
+
+> 配置
+
+```yml
+server:
+  port: 8989
+spring:
+  application:
+    name: gateway
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+    gateway:
+      routes:
+        - id: users_router    #指定路由唯一标识
+          uri: http://localhost:9999/   #指定地址
+          predicates:
+            - Path=/user/**     #把以user开头的请求转发到用户服务
+```
+
+> 依赖
+
+```xml
+<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+```
+
+> 同时需要引入Spring-Cloud Consul等依赖，还需要移除以下依赖
+
+```xml
+<!--        使用网关不能使用该依赖  因为gateway网关是基于spring-webflux 会照成冲突-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-web</artifactId>-->
+<!--        </dependency>-->
+
+```
+

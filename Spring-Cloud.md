@@ -424,7 +424,7 @@ public class ProductClientFallBack implements ProductClient{
 
 ### 1.GateWay组件
 
-> 配置
+> 配置，也可以使用Java配置类的形式进行配置，官方建议使用配置文件
 
 ```yml
 server:
@@ -443,7 +443,7 @@ spring:
         - id: users_router    #指定路由唯一标识
           uri: http://localhost:9999/   #指定地址
           predicates:
-            - Path=/user/**     #把以user开头的请求转发到用户服务
+            - Path=/user/**     #把以user开头的请求转发到用户服务（断言）
 ```
 
 > 依赖
@@ -466,3 +466,38 @@ spring:
 
 ```
 
+#### (1).实现负载均衡路由转发
+
+> 直接修改uri为
+
+```yml
+uri: lb://users  ->  服务名称
+```
+
+#### (2).Predicate  断言
+
+```yml
+- Path=  /user/**    #把以user开头的请求转发到用户服务（断言）
+#ZonedDateTime.now() 获取区域时间  以下代表时间之后才能访问对应的服务
+ - After=2021-01-17T20:21:00.068261300+08:00[Asia/Shanghai]
+ #以下代表时间之前才能访问对应的服务
+ - Before=2021-01-17T20:23:00.068261300+08:00[Asia/Shanghai]
+ #以下代表时间段之内才能访问对应的服务
+ - Between=2021-01-17T20:21:00.068261300+08:00[Asia/Shanghai],2021-01-	      17T20:23:00.068261300+08:00[Asia/Shanghai]
+ #以下为http请求头内携带cookie信息，且有键值对username=ssq
+ - Cookie=username,ssq
+ #以下为http请求头内携带cookie信息，且有键值对username={满足正则表达式}
+ - Cookie=username,[A-Za-z0-9]+
+ #请求头中有以下蛮族条件的键值对
+ - Header=id,\d+
+ #必须是以下请求方式
+ - Method=GET,POST
+```
+
+#### (3).Filters 路由筛选器（权限过滤器）
+
+> 内置过滤器使用不多，一般使用自定义过滤器
+
+![image-20210117210921235](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210117210921235.png)
+
+> 其中可以替换为自己的逻辑，例如JWT

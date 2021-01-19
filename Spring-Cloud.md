@@ -477,8 +477,8 @@ uri: lb://users  ->  服务名称
 #### (2).Predicate  断言
 
 ```yml
-- Path=  /user/**    #把以user开头的请求转发到用户服务（断言）
-#ZonedDateTime.now() 获取区域时间  以下代表时间之后才能访问对应的服务
+ - Path=  /user/**    #把以user开头的请求转发到用户服务（断言）
+ #ZonedDateTime.now() 获取区域时间  以下代表时间之后才能访问对应的服务
  - After=2021-01-17T20:21:00.068261300+08:00[Asia/Shanghai]
  #以下代表时间之前才能访问对应的服务
  - Before=2021-01-17T20:23:00.068261300+08:00[Asia/Shanghai]
@@ -501,3 +501,94 @@ uri: lb://users  ->  服务名称
 ![image-20210117210921235](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210117210921235.png)
 
 > 其中可以替换为自己的逻辑，例如JWT
+
+## 七.Config组件
+
+![image-20210118190250212](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210118190250212.png)
+
+### 1.Config Server
+
+> 引入spring-cloud，consul，config-server
+
+```xml
+<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-config-server</artifactId>
+</dependency>
+```
+
+> 启动类加入注解
+
+```java
+@EnableConfigServer
+```
+
+> 配置
+
+```properties
+server.port=7878
+spring.application.name=configserver
+spring.cloud.consul.port=8500
+spring.cloud.consul.host=localhost
+spring.cloud.consul.discovery.service-name=${spring.application.name}
+#设置远程git地址,注意仓库一定是公共的，且为http协议
+#如果是私有的则需要配置账号密码
+spring.cloud.config.server.git.uri=https://github.com/ssq1234/configserver.git
+#修改本地仓库存储目录(一定要注意文件夹要为空文件夹，因为启动时会清空该文件夹里的所有内容)
+spring.cloud.config.server.git.basedir=C:/Users/sunshuqiang/Desktop/项目/springCloud/test/configserver7878/src/main/resources/localconfig
+#指定分支，GitHub目前默认分支叫做main
+spring.cloud.config.server.default-label=main
+```
+
+启动后访问
+
+> http://localhost:7878/orders-xxx.properties
+>
+> orders为文件名 xxx为属于哪一种环境下的配置（开发，测试，上线...）
+>
+> 如果xxx找不到则默认访问orders.properties(公共配置文件，一些基础的公共的配置都在这里)
+>
+> 后缀也可以改成yml或者json，会自动转换为对应的格式
+
+### 2.Config Client
+
+![image-20210119202907187](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210119202907187.png)
+
+> 因为需要预加载配置所以配置文件应该修改名称为bootstrap.properties或者yml
+>
+> 该配置文件的优先级要高于application.properties或者yml
+
+![image-20210119205008224](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210119205008224.png)
+
+```properties
+#开启从远端找配置
+spring.cloud.config.discovery.enabled=true
+#按照这个名称的配置中心去拉去配置
+spring.cloud.config.discovery.service-id=configserver
+#设置GitHub分支
+spring.cloud.config.label=main
+#公共配置文件名
+spring.cloud.config.name=client
+#独有配置文件名
+spring.cloud.config.profile=prod
+#一定要加上服务名称，负责会导致无法在consul注册
+spring.application.name=configclient
+```
+
+> 手动配置刷新
+
+```properties
+#开启所有web端点暴露，以便可以接受刷新配置的post请求
+management.endpoints.web.exposure.include=*
+```
+
+> http://localhost:7879/actuator/refresh
+>
+> 对单个服务进行post请求，通知进行配置刷新
+>
+> 但只能进行整体的配置刷新，如果你注入了配置内容则需要在类上加上注解,这样注入的信息才会在代码中发生改变
+
+```java
+@RefreshScope
+```
+

@@ -592,3 +592,108 @@ management.endpoints.web.exposure.include=*
 @RefreshScope
 ```
 
+## 八.消息总线（BUS）
+
+### 1.RabbitMQ
+
+> erlang安装包
+
+```apl
+https://packages.erlang-solutions.com/erlang/rpm/centos/7/x86_64/esl-erlang_22.1-1~centos~7_amd64.rpm
+```
+
+> rabbitmq安装包
+
+https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.0/rabbitmq-server-3.8.0-1.el7.noarch.rpm
+
+> erlang rpm方式安装
+
+#### (1).安装依赖项
+
+```shell
+yum install -y epel-release
+```
+
+#### (2).下载rpm包
+
+```shell
+wget https://packages.erlang-solutions.com/erlang/rpm/centos/7/x86_64/esl-erlang_22.1-1~centos~7_amd64.rpm
+```
+
+#### (3).安装
+
+```shell
+yum install esl-erlang_22.1-1~centos~7_amd64.rpm
+```
+
+#### (4).验证
+
+```shell
+erl -version
+```
+
+> 出现“Erlang (SMP,ASYNC_THREADS,HIPE) (BEAM) emulator version 10.5”证明安装成功
+
+> rabbitmq rpm安装
+
+#### (1).安装依赖项
+
+```shell
+yum install rabbitmq-server-3.8.0-1.el7.noarch.rpm
+```
+
+#### (2).开机启动及启动
+
+```shell
+chkconfig rabbitmq-server on
+systemctl start rabbitmq-server
+```
+
+#### (3).检查 
+
+```shell
+rabbitmqctl status
+```
+
+#### (4)启用UI以及PROMETHEUS插件
+
+```bash
+# 启用插件
+rabbitmq-plugins enable rabbitmq_management rabbitmq_prometheus
+
+# 查看启用的插件
+rabbitmq-plugins list
+.... 省略其他
+[E*] rabbitmq_management               3.8.7
+[e*] rabbitmq_management_agent         3.8.7
+[E*] rabbitmq_prometheus               3.8.7
+[e*] rabbitmq_web_dispatch             3.8.7
+
+# 重启服务
+systemctl restart rabbitmq-server.service
+
+netstat -pltn
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:25672           0.0.0.0:*               LISTEN      3081/beam.smp       
+tcp        0      0 0.0.0.0:15692           0.0.0.0:*               LISTEN      3081/beam.smp  # prometheus metrics     
+tcp        0      0 0.0.0.0:4369            0.0.0.0:*               LISTEN      3211/epmd                  
+tcp        0      0 0.0.0.0:15672           0.0.0.0:*               LISTEN      3081/beam.smp       
+tcp6       0      0 :::5672                 :::*                    LISTEN      3081/beam.smp    
+
+# 验证metrics API
+curl localhost:15692/metrics
+
+# 验证UI
+浏览器访问 10.122.151.8:15672 （本地IP地址 10.122.151.8）
+备注：当前版本guest/guest默认只支持localhost访问[User can only log in via localhost]，如果需要可以修改
+```
+
+#### (5)创建ADMIN账户，设置角色，并授权
+
+这里授予做大权限了，可以根据实际需要进行授权
+
+```bash
+rabbitmqctl add_user admin admin
+rabbitmqctl set_user_tags admin  administrator
+rabbitmqctl set_permissions -p / admin  ".*" ".*" ".*"
+```

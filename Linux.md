@@ -69,3 +69,34 @@ systemctl enable mongod.service
 **5.启动Mongo shell**
 
 命令：mongo 
+
+6.配置下载源为163
+
+1、首先备份系统自带yum源配置文件/etc/yum.repos.d/CentOS-Base.repo
+
+```shell
+[root@localhost ~]# mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+```
+
+2、进入yum源配置文件所在的文件夹
+
+```shell
+[root@localhost ~]# cd /etc/yum.repos.d/
+```
+
+3、下载163的yum源配置文件到上面那个文件夹内
+
+```shell
+CentOS7``[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS7-Base-163.repo``CentOS6``
+[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS6-Base-163.repo``CentOS5``
+[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS5-Base-163.repo
+```
+
+4、运行yum makecache生成缓存
+
+```shell
+[root@localhost yum.repos.d]# yum makecache
+```
+
+
+

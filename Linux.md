@@ -1,101 +1,173 @@
 > # **Linux相关**
 
-**Linux常用命令**
+## 一.**Linux常用命令**
 
-1.查看有关Java的进程：ps -ef | grep java
+### 1.查看有关Java的进程
 
-2.强迫进程立即停止（-9）：kill -9 [PID]
+```shell
+ps -ef | grep java
+```
 
-3.不挂断运行命令,当账户退出或终端关闭时,程序仍然运行：nohup java -jar XXX.jar &
+### 2.强迫进程立即停止（-9）
 
-（承上）列出所有后台作业：jobs
+```shell
+kill -9 [PID]
+```
 
-（承上）把作业调回前台：fg 编号
+### 3.不挂断运行命令,当账户退出或终端关闭时,程序仍然运行：
 
-4.查看防火墙状态 service iptables status
+```shell
+nohup java -jar XXX.jar &
+```
 
-关闭防火墙 service iptables stop
+> （承上）列出所有后台作业：jobs
+>
+> （承上）把作业调回前台：fg 编号
+>
 
-**MongoDb命令**
+### 4.查看防火墙状态
 
-Linux Centos 使用yum安装MongoDB 4.0
+```shell
+ service iptables status
+```
 
-**1.配置MongoDB的yum源**
+### 5.关闭防火墙 
 
-创建yum源文件：
+```shell
+service iptables stop
+```
 
-\#cd /etc/yum.repos.d 
+### 6.监听日志
 
-\#vim mongodb-org-4.0.repo 
+```shell
+tail -f 文件
+```
 
-添加以下内容：（我们这里使用阿里云的源）
+## 二.MongoDb命令
 
+> Linux Centos 使用yum安装MongoDB 4.0
+>
+
+### **1.配置MongoDB的yum源**
+
+> 创建yum源文件：
+>
+
+```shell
+cd /etc/yum.repos.d 
+
+vim mongodb-org-4.0.repo 
+```
+
+> 添加以下内容：（我们这里使用阿里云的源）
+>
+
+```markdown
 [mongodb-org] name=MongoDB Repository baseurl=http://mirrors.aliyun.com/mongodb/yum/redhat/7Server/mongodb-org/4.0/x86_64/ gpgcheck=0 enabled=1
+```
 
-这里可以修改 gpgcheck=0, 省去gpg验证
+> 这里可以修改 gpgcheck=0, 省去gpg验证
+>
 
-安装之前先更新所有包 ：
+> 安装之前先更新所有包 ：
+>
 
-\# yum update
+```shell
+yum update
+```
 
-**2.安装MongoDB**
+### **2.安装MongoDB**
 
-安装命令：
+> 安装命令：
+>
 
+```shell
 yum -y install mongodb-org
+```
 
-安装完成后
+> 安装完成后
+>
+> 查看mongo安装位置
 
-查看mongo安装位置 whereis mongod
+```shell
+ whereis mongod
+```
 
-查看修改配置文件 ： vim /etc/mongod.conf
+> 查看修改配置文件  
 
- bindIp: 172.0.0.1 改为 bindIp: 0.0.0.0
+```shell
+vim /etc/mongod.conf
+```
 
-（注意冒号与ip之间需要一个空格）
+>  bindIp: 172.0.0.1 改为 bindIp: 0.0.0.0
+>
+> （注意冒号与ip之间需要一个空格）
+>
 
-**3.启动MongoDB** 
+### **3.启动MongoDB** 
 
+```shell
 启动mongodb ：sudo systemctl start mongod.service
 
 停止mongodb ：sudo systemctl stop mongod.service
 
 查到mongodb的状态：systemctl status mongod.service
+```
 
-**4.设置开机启动**
+### **4.设置开机启动**
 
+```shell
 systemctl enable mongod.service
+```
 
-**5.启动Mongo shell**
+### **5.启动Mongo shell**
 
+```shell
 命令：mongo 
-
-6.配置下载源为163
-
-1、首先备份系统自带yum源配置文件/etc/yum.repos.d/CentOS-Base.repo
-
-```shell
-[root@localhost ~]# mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 ```
 
-2、进入yum源配置文件所在的文件夹
+## 三.配置下载源为aliyun
 
-```shell
-[root@localhost ~]# cd /etc/yum.repos.d/
+### 1.进入/etc/yum.repos.d目录
+
+```powershell
+cd /etc/yum.repos.d
 ```
 
-3、下载163的yum源配置文件到上面那个文件夹内
+### 2.CentOS-Base.repo改名
 
-```shell
-CentOS7``[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS7-Base-163.repo``CentOS6``
-[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS6-Base-163.repo``CentOS5``
-[root@localhost yum.repos.d]# wget http:``//mirrors.163.com/.help/CentOS5-Base-163.repo
+> 默认使用的是CentOS-Base.repo，所以我们需要对默认的文件改名
+
+```powershell
+mv CentOS-Base.repo CentOS-Base.repo.back
 ```
 
-4、运行yum makecache生成缓存
+### 3.下载repo文件
 
-```shell
-[root@localhost yum.repos.d]# yum makecache
+```powershell
+wget http://mirrors.aliyun.com/repo/Centos-7.repo
+```
+
+### 4.Centos-7.repo改名
+
+> 将下载的国内源改名为默认的文件名
+
+```powershell
+mv Centos-7.repo CentOS-Base.repo
+```
+
+### 5.执行yum源更新命令
+
+```powershell
+yum clean all 
+yum makecache 
+12
+```
+
+### 6.查看yum源
+
+```powershell
+yum repolist all
 ```
 
 

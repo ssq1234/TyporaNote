@@ -592,7 +592,7 @@ management.endpoints.web.exposure.include=*
 @RefreshScope
 ```
 
-## 八.消息总线（BUS）
+## 八.消息总线（BUS）（目前连不上，可以替换为阿里巴巴解决方案）
 
 ### 1.RabbitMQ
 
@@ -688,7 +688,7 @@ curl localhost:15692/metrics
 备注：当前版本guest/guest默认只支持localhost访问[User can only log in via localhost]，如果需要可以修改
 ```
 
-#### (5)创建ADMIN账户，设置角色，并授权
+#### (5)创建admin账户，设置角色，并授权
 
 这里授予做大权限了，可以根据实际需要进行授权
 

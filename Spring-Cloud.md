@@ -198,16 +198,16 @@ System.out.println(products1.getPort());
 ```java
 @Autowired
 
-**private** LoadBalancerClient **loadBalancerClient**;
+private LoadBalancerClient loadBalancerClient;
 
-ServiceInstance products1 = **loadBalancerClient**.choose(**"products"**);
+ServiceInstance products1 = loadBalancerClient.choose("products");
 
-System.**out**.println(products1.getHost());
+System.out.println(products1.getHost());
 
-System.**out**.println(products1.getPort());
+System.out.println(products1.getPort());
 ```
 
-#### **(3).@LoadBalanced**  **带有****Ribbon轮询****负载均衡的****RestTemplate****对象**
+#### **(3).@LoadBalanced**  带有Ribbon轮询负载均衡的RestTemplate对象
 
 > **编写配置类**
 
@@ -240,7 +240,7 @@ String forObject1 = restTemplate.getForObject("http://项目名称/product/showM
 
 #### **(5).修改负载均衡策略**
 
-> **调用需要负载均衡服务名称.ribbon.NFLoadBalancerRuleclassName** =**com.netflix.loadbalancer.RandomRule****（策略类）  （IRule  ctrl+h 查看有哪些策略实现类****）**
+> **调用需要负载均衡服务名称.ribbon.NFLoadBalancerRuleclassName** =com.netflix.loadbalancer.RandomRule（策略类）  （IRule  ctrl+h 查看有哪些策略实现类）
 
 ### **3.OpenFeign**
 
@@ -304,6 +304,12 @@ Map<String, Object> one = productClient.findOne(id);
 
 ```java
 @RequestBody
+```
+
+> 当参数为文件时
+
+```java
+@RequestPart("")  //除此之外还可能有其他配置
 ```
 
 

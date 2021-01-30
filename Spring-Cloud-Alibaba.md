@@ -25,7 +25,7 @@
 </dependencyManagement>
 ```
 
-## 二.Nacos
+## 二.Nacos配置中心
 
 ### 1.client配置
 
@@ -67,6 +67,10 @@ spring.application.name=configclient
 spring.cloud.nacos.server-addr=sunshuqiang.top:8848
 #指定拉去配置文件的位置
 spring.cloud.nacos.config.server-addr=${spring.cloud.nacos.server-addr}
+
+
+#指定命名空间
+#spring.cloud.nacos.config.namespace=
 #指定分组
 spring.cloud.nacos.config.group=DEFAULT_GROUP
 #指定
@@ -82,3 +86,55 @@ spring.cloud.nacos.config.file-extension=properties
 > 仍旧使用老版组件
 
 openfegin在使用时需要额外引入，并且需要引入cloud官方版本，这样就不用填写版本号
+
+## 四.Sentinel流量卫兵
+
+### 1.引入依赖
+
+```xml
+<dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+```
+
+> QPS ：每秒请求数
+
+> 配置
+
+```properties
+spring.cloud.sentinel.transport.dashboard=sunshuqiang.top:9191
+spring.cloud.sentinel.transport.port=8719
+```
+
+
+
+> sentinel要跑在本地才可以，若要跑在云端，则微服务需要配置，否则实时监控无效
+
+```properties
+spring.cloud.sentinel.transport.clientIp=微服务所在的地址
+```
+
+### 2.流控规则
+
+#### (1).直接限流
+
+> 当QPS>1时，直接限流
+
+#### (2).关联限流
+
+![image-20210130211107158](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210130211107158.png)
+
+> 例如两种请求分别对数据库进行读和写的操作，如果任凭两者抢夺资源，则会降低吞吐量，所以设置关联模式，当/test/test1 在一秒内QPS>时  对/test/test进行限流
+
+#### (3).链路限流
+
+![image-20210130211914467](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210130211914467.png)
+
+> 当/product/orderFindAll QPS>1时，将会限制/product/orderFindAll 对 /order/findAll的调用
+
+> **应用场景: 比如支付接口（/product/orderFindAll）达到阈值,就要限流下订单的接口（/order/findAll）,防止一直有订单**
+
+#### (4).流控效果
+
+#### ![image-20210130214955480](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210130214955480.png)       

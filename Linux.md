@@ -1,4 +1,4 @@
-> # **Linux相关**
+> # **  Linux相关**
 
 ## 一.**Linux常用命令**
 
@@ -40,7 +40,13 @@ service iptables stop
 ### 6.监听日志
 
 ```shell
-tail -f 文件
+tail -f 日志文件
+```
+
+### 7.查看储存空间
+
+```shell
+df -hl
 ```
 
 ## 二.MongoDb命令

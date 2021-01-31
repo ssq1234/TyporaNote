@@ -25,6 +25,18 @@
 </dependencyManagement>
 ```
 
+> **所有的子项目一定要引入他爹是谁不然他找不到，我操你妈IDEA    <-  这傻逼干的**
+
+```xml
+<parent>
+    <groupId>com.cust</groupId>
+    <artifactId>para</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+```
+
+
+
 ## 二.Nacos配置中心
 
 ### 1.client配置
@@ -43,8 +55,6 @@ server.port=8789
 spring.application.name=nacosclient
 spring.cloud.nacos.server-addr=sunshuqiang.top:8848
 spring.cloud.nacos.discovery.server-addr=${spring.cloud.nacos.server-addr}
-#暴露所有web端点
-management.endpoint.web.exposure.include=*
 ```
 
 ### 2.配置中心配置
@@ -138,3 +148,15 @@ spring.cloud.sentinel.transport.clientIp=微服务所在的地址
 #### (4).流控效果
 
 #### ![image-20210130214955480](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210130214955480.png)       
+
+#### (5).降级策略
+
+![image-20210131130535355](Spring-Cloud-Alibaba.assets/image-20210131130535355.png)
+
+![image-20210131132311001](Spring-Cloud-Alibaba.assets/image-20210131132311001.png)
+
+## 五.架构说明
+
+![image-20210131133256538](Spring-Cloud-Alibaba.assets/image-20210131133256538.png)
+
+> 服务网关也要做服务的集群

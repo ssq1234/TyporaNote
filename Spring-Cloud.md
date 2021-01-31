@@ -280,6 +280,7 @@ public interface ProductClient {
 ```java
 @Autowired
 private ProductClient productClient;
+
 String msg = productClient.ShowMsg();
 ```
 

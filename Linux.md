@@ -49,6 +49,14 @@ tail -f 日志文件
 df -hl
 ```
 
+### 8.查看文件
+
+```shell
+cat 文件名
+```
+
+
+
 ## 二.MongoDb命令
 
 > Linux Centos 使用yum安装MongoDB 4.0

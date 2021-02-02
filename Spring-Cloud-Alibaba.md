@@ -151,12 +151,12 @@ spring.cloud.sentinel.transport.clientIp=微服务所在的地址
 
 #### (5).降级策略
 
-![image-20210131130535355](Spring-Cloud-Alibaba.assets/image-20210131130535355.png)
+![image-20210131130535355](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210131130535355.png)
 
-![image-20210131132311001](Spring-Cloud-Alibaba.assets/image-20210131132311001.png)
+![image-20210131132311001](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210131132311001.png)
 
 ## 五.架构说明
 
-![image-20210131133256538](Spring-Cloud-Alibaba.assets/image-20210131133256538.png)
+![image-20210131133256538](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210131133256538.png)
 
 > 服务网关也要做服务的集群

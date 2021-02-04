@@ -101,20 +101,29 @@ docker cp 容器内资源路径 ID|NAME:容器内资源路径	//向容器内拷�
 docker inspect   //查看容器内部状态
 ```
 
-> 
->
 > 数据卷volume	可以实现宿主机和容器的文件共享 比如共享一个文件夹
 >
 > 对宿主机文件操作时	可以同时影响到容器
 >
 > **必须在容器启动之前绑定一个数据卷**
+>
+> 数据卷不会影响镜像
+>
+> 数据卷一直会存在 即使容器被删除
 
 ```shell
 //当目录为空时 容器内被映射的文件夹内会被清空
 docker run -d -p 8080:8080 ID|NAME --name Name -v 宿主机目录:容器目录 //自定义实现数据卷绑定
+//加ro（readonly）只能通过宿主机改变容器，容器不能改变宿主机
+docker run -d -p 8080:8080 ID|NAME --name Name -v 宿主机目录:容器目录:ro 
 //当目录不存在时    docker会在自己的目录下自动创建一个目录做映射 并且把容器内文件夹内的内容复制进来
 //自动创建的文件路径是 var/lib/docker/volumes/数据卷名称
-docker run -d -p 8080:8080 ID|NAME --name Name -v 数据卷名字:容器目录 //自动实现数据卷绑定 
+docker run -d -p 8080:8080 ID|NAME --name Name -v 数据卷名字:容器目录 //自动实现数据卷绑定
+docker volume ls //查看有哪些数据卷
+docker volume inspect 数据卷名称 //查看数据卷细节
+docker volume create 数据卷名称 //创建新的数据卷
+docker volume prune //删除没有被用到的数据卷
+docker volume rm 数据卷名称 //删除指定的数据卷
 ```
 
 ```shell
@@ -132,4 +141,14 @@ docker run -d -p 8080:8080 ID|NAME --name Name 起个名字 --network 网桥名�
 docker network rm NAME //删除网桥
 docker inspect NAME //查看网桥详细
 ```
+
+## 五.docker安装常用的服务
+
+### 1.MySql
+
+```shell
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=密码 -d mysql:tag
+```
+
+
 

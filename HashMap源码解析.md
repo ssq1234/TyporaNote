@@ -6,10 +6,125 @@
 /*
  * Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 package java.util;
 import java.io.*;
+
+/**
+ * Hash table based implementation of the <tt>Map</tt> interface.  This
+ * implementation provides all of the optional map operations, and permits
+ * <tt>null</tt> values and the <tt>null</tt> key.  (The <tt>HashMap</tt>
+ * class is roughly equivalent to <tt>Hashtable</tt>, except that it is
+ * unsynchronized and permits nulls.)  This class makes no guarantees as to
+ * the order of the map; in particular, it does not guarantee that the order
+ * will remain constant over time.
+ *
+ * <p>This implementation provides constant-time performance for the basic
+ * operations (<tt>get</tt> and <tt>put</tt>), assuming the hash function
+ * disperses the elements properly among the buckets.  Iteration over
+ * collection views requires time proportional to the "capacity" of the
+ * <tt>HashMap</tt> instance (the number of buckets) plus its size (the number
+ * of key-value mappings).  Thus, it's very important not to set the initial
+ * capacity too high (or the load factor too low) if iteration performance is
+ * important.
+ *
+ * <p>An instance of <tt>HashMap</tt> has two parameters that affect its
+ * performance: <i>initial capacity</i> and <i>load factor</i>.  The
+ * <i>capacity</i> is the number of buckets in the hash table, and the initial
+ * capacity is simply the capacity at the time the hash table is created.  The
+ * <i>load factor</i> is a measure of how full the hash table is allowed to
+ * get before its capacity is automatically increased.  When the number of
+ * entries in the hash table exceeds the product of the load factor and the
+ * current capacity, the hash table is <i>rehashed</i> (that is, internal data
+ * structures are rebuilt) so that the hash table has approximately twice the
+ * number of buckets.
+ *
+ * <p>As a general rule, the default load factor (.75) offers a good tradeoff
+ * between time and space costs.  Higher values decrease the space overhead
+ * but increase the lookup cost (reflected in most of the operations of the
+ * <tt>HashMap</tt> class, including <tt>get</tt> and <tt>put</tt>).  The
+ * expected number of entries in the map and its load factor should be taken
+ * into account when setting its initial capacity, so as to minimize the
+ * number of rehash operations.  If the initial capacity is greater
+ * than the maximum number of entries divided by the load factor, no
+ * rehash operations will ever occur.
+ *
+ * <p>If many mappings are to be stored in a <tt>HashMap</tt> instance,
+ * creating it with a sufficiently large capacity will allow the mappings to
+ * be stored more efficiently than letting it perform automatic rehashing as
+ * needed to grow the table.
+ *
+ * <p><strong>Note that this implementation is not synchronized.</strong>
+ * If multiple threads access a hash map concurrently, and at least one of
+ * the threads modifies the map structurally, it <i>must</i> be
+ * synchronized externally.  (A structural modification is any operation
+ * that adds or deletes one or more mappings; merely changing the value
+ * associated with a key that an instance already contains is not a
+ * structural modification.)  This is typically accomplished by
+ * synchronizing on some object that naturally encapsulates the map.
+ *
+ * If no such object exists, the map should be "wrapped" using the
+ * {@link Collections#synchronizedMap Collections.synchronizedMap}
+ * method.  This is best done at creation time, to prevent accidental
+ * unsynchronized access to the map:<pre>
+ *   Map m = Collections.synchronizedMap(new HashMap(...));</pre>
+ *
+ * <p>The iterators returned by all of this class's "collection view methods"
+ * are <i>fail-fast</i>: if the map is structurally modified at any time after
+ * the iterator is created, in any way except through the iterator's own
+ * <tt>remove</tt> method, the iterator will throw a
+ * {@link ConcurrentModificationException}.  Thus, in the face of concurrent
+ * modification, the iterator fails quickly and cleanly, rather than risking
+ * arbitrary, non-deterministic behavior at an undetermined time in the
+ * future.
+ *
+ * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
+ * as it is, generally speaking, impossible to make any hard guarantees in the
+ * presence of unsynchronized concurrent modification.  Fail-fast iterators
+ * throw <tt>ConcurrentModificationException</tt> on a best-effort basis.
+ * Therefore, it would be wrong to write a program that depended on this
+ * exception for its correctness: <i>the fail-fast behavior of iterators
+ * should be used only to detect bugs.</i>
+ *
+ * <p>This class is a member of the
+ * <a href="{@docRoot}/../technotes/guides/collections/index.html">
+ * Java Collections Framework</a>.
+ *
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values
+ *
+ * @author  Doug Lea
+ * @author  Josh Bloch
+ * @author  Arthur van Hoff
+ * @author  Neal Gafter
+ * @see     Object#hashCode()
+ * @see     Collection
+ * @see     Map
+ * @see     TreeMap
+ * @see     Hashtable
+ * @since   1.2
+ */
 
 public class HashMap<K,V>
         extends AbstractMap<K,V>
@@ -22,7 +137,7 @@ public class HashMap<K,V>
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
 
     /**
-     * 最大容量
+     * 数组最大长度
      */
     static final int MAXIMUM_CAPACITY = 1 << 30;
 
@@ -48,10 +163,9 @@ public class HashMap<K,V>
 
     /**
      * 阈值  和加载因子是有关系的  是根据加载因子算出来的
-     * @serial
+     * threshold = (int) Math.min(capacity * loadFactor（加载因子）
+     * , MAXIMUM_CAPACITY + 1（最大容量+1）);
      */
-    // If table == EMPTY_TABLE then this is the initial capacity at which the
-    // table will be created when inflated.
     int threshold;
 
     /**
@@ -88,7 +202,7 @@ public class HashMap<K,V>
     private static class Holder {
 
         /**
-         * Table capacity above which to switch to use alternative hashing.
+         * 默认为Interger的最大值
          */
         static final int ALTERNATIVE_HASHING_THRESHOLD;
 
@@ -120,7 +234,7 @@ public class HashMap<K,V>
     }
 
     /**
-     * hash种子
+     * hash种子 用于计算hash值  让hash值更散列一点
      */
     transient int hashSeed = 0;
 
@@ -201,11 +315,12 @@ public class HashMap<K,V>
     }
 
     /**
-     * Inflates the table.
+     * 初始化数组
+     * @param toSize 数组大小
      */
     private void inflateTable(int toSize) {
         /*  根据传进来的数组长度toSize计算出一个大于等于toSize的2
-         *  的幂次方数 toSize = 10 capacity = 2的四次方 = 16
+         *  的幂次方数 如果toSize = 10 capacity = 2的四次方 = 16
         */
         int capacity = roundUpToPowerOf2(toSize); //最终初始化的数组容量
         //根据数组的大小和加载因子算出阈值
@@ -229,13 +344,13 @@ public class HashMap<K,V>
     }
 
     /**
-     * Initialize the hashing mask value. We defer initialization until we
-     * really need it.
+     * 通过传入的运行时环境传入的变量 决定哈希种子
      */
     final boolean initHashSeedAsNeeded(int capacity) {
         boolean currentAltHashing = hashSeed != 0;
         boolean useAltHashing = sun.misc.VM.isBooted() &&
                 (capacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
+        //异或 不相等返回true
         boolean switching = currentAltHashing ^ useAltHashing;
         if (switching) {
             hashSeed = useAltHashing
@@ -246,11 +361,8 @@ public class HashMap<K,V>
     }
 
     /**
-     * Retrieve object hash code and applies a supplemental hash function to the
-     * result hash, which defends against poor quality hash functions.  This is
-     * critical because HashMap uses power-of-two length hash tables, that
-     * otherwise encounter collisions for hashCodes that do not differ
-     * in lower bits. Note: Null keys always map to hash 0, thus index 0.
+     * 算出一个hash值
+     * @param k key值
      */
     final int hash(Object k) {
         int h = hashSeed;
@@ -270,6 +382,8 @@ public class HashMap<K,V>
 
     /**
      * 算出一个数组下标.
+     * @param h hash值
+     * @param length 数组长度
      */
     static int indexFor(int h, int length) {
         // assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";
@@ -371,16 +485,11 @@ public class HashMap<K,V>
     }
 
     /**
-     * Associates the specified value with the specified key in this map.
-     * If the map previously contained a mapping for the key, the old
-     * value is replaced.
+     * 存值方法
      *
-     * @param key key with which the specified value is to be associated
-     * @param value value to be associated with the specified key
-     * @return the previous value associated with <tt>key</tt>, or
-     *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
-     *         (A <tt>null</tt> return can also indicate that the map
-     *         previously associated <tt>null</tt> with <tt>key</tt>.)
+     * @param key 键
+     * @param value 值
+     * @return key重复或key为空 就返回旧值
      */
     public V put(K key, V value) {
         if (table == EMPTY_TABLE) {  //判断当前数组是否为空
@@ -416,6 +525,7 @@ public class HashMap<K,V>
     /**
      * 当key为null时进行的操作
      * 默认会被存在数组的0号位置
+     * @param value 插入的值
      */
     private V putForNullKey(V value) {
         //循环看看0号位是不是有key为null的重复值 重复则覆盖
@@ -465,47 +575,52 @@ public class HashMap<K,V>
     }
 
     /**
-     * Rehashes the contents of this map into a new array with a
-     * larger capacity.  This method is called automatically when the
-     * number of keys in this map reaches its threshold.
+     * 对数组进行扩容
      *
-     * If current capacity is MAXIMUM_CAPACITY, this method does not
-     * resize the map, but sets threshold to Integer.MAX_VALUE.
-     * This has the effect of preventing future calls.
-     *
-     * @param newCapacity the new capacity, MUST be a power of two;
-     *        must be greater than current capacity unless current
-     *        capacity is MAXIMUM_CAPACITY (in which case value
-     *        is irrelevant).
+     * @param newCapacity 老数组的容量的二倍
      */
     void resize(int newCapacity) {
         Entry[] oldTable = table;
         int oldCapacity = oldTable.length;
+        //如果数组已经最大了 就不会进行扩容
         if (oldCapacity == MAXIMUM_CAPACITY) {
             threshold = Integer.MAX_VALUE;
             return;
         }
-
+        //创建一个大小为原来二倍的新数组
         Entry[] newTable = new Entry[newCapacity];
+        //老数组的数据被转移到了新数组上
         transfer(newTable, initHashSeedAsNeeded(newCapacity));
+        //现在老数组变成了新数组
         table = newTable;
+        //算出新的阈值
         threshold = (int)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);
     }
 
     /**
-     * Transfers all entries from current table to newTable.
+     * 转移方法
+     * 把老数组上的链表转移到新数组上
      */
     void transfer(Entry[] newTable, boolean rehash) {
         int newCapacity = newTable.length;
+        //遍历老数组
         for (Entry<K,V> e : table) {
-            while(null != e) {
-                Entry<K,V> next = e.next;
+            while(null != e) { //如果当前位置不是空
+                //当前位置指向新建立的Entry对象
+                Entry<K,V> next = e.next;  //next就是原来位置的对象
                 if (rehash) {
                     e.hash = null == e.key ? 0 : hash(e.key);
                 }
+                /*根据新数组的大小算出一个新的数组下标
+                 *算出的数组下标可能不变 可能是老数组下标+老数组的长度
+                */
                 int i = indexFor(e.hash, newCapacity);
+                //老数组将要被移动的位置 指向了新数组要存的新位置
                 e.next = newTable[i];
+                //新数组的新位置存上了要移动Entry的对象
+                //e最终指向了自己
                 newTable[i] = e;
+                //e指向了老数组被移动过的位置  e被置空跳出while循环
                 e = next;
             }
         }
@@ -777,17 +892,20 @@ public class HashMap<K,V>
     }
 
     /**
-     * Adds a new entry with the specified key, value and hash code to
-     * the specified bucket.  It is the responsibility of this
-     * method to resize the table if appropriate.
-     *
-     * Subclass overrides this to alter the behavior of put method.
+     * 添加数据
+     * @param hash hash值
+     * @param key key值
+     * @param value 值
+     * @param bucketIndex 数组下标
      */
     void addEntry(int hash, K key, V value, int bucketIndex) {
-        //判断数组大小是否大于阈值  或者需要扩容进入if
+        //判断数组元素个数大于阈值并且当前要插入的数组位置不为空 需要扩容进入if
+        //threshold = 数组长度*加载因子
         if ((size >= threshold) && (null != table[bucketIndex])) {
+            //对数组进行扩容 新数组长度为原来的2倍
             resize(2 * table.length);
             hash = (null != key) ? hash(key) : 0;
+            //新的数组下标
             bucketIndex = indexFor(hash, table.length);
         }
         //否则进入下面的方法  把参数原封不动的传进去
@@ -795,12 +913,8 @@ public class HashMap<K,V>
     }
 
     /**
-     * Like addEntry except that this version is used when creating entries
-     * as part of Map construction or "pseudo-construction" (cloning,
-     * deserialization).  This version needn't worry about resizing the table.
-     *
-     * Subclass overrides this to alter the behavior of HashMap(Map),
-     * clone, and readObject.
+     * 添加数据
+     * @param bucketIndex 数组下标
      */
     void createEntry(int hash, K key, V value, int bucketIndex) {
         //根据数组下标获取到当前entry对象（相当于header）

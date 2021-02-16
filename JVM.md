@@ -12,4 +12,169 @@
 
 ![image-20210209180253453](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210209180253453.png)
 
-![image-20210209180644227](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210209180644227.png)
+![image-20210209180644227](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210209180644227.png) 
+
+## 三.JVM发展历程
+
+### 1.Sun Classic VM
+
+> JAVA最初的虚拟机
+
+> HotSpot内置了该虚拟机  JDK1.4版本时被弃用
+
+> 只提供了解释器 **没有提供即时编译器JIT** 但是可以外挂JIT 但是二者不能协同工作
+
+> 外挂JIT后会使用JIT做为编译器 
+
+> 单纯的使用JIT  会把每一行代码翻译成本地机器码 导致暂停时间过长 程序在启动时会有一段时间的卡顿
+
+> 而二者如果可以协同工作 可以理解为一段路程  
+>
+> 1.我先用解释器 逐行翻译执行 **走两步** 等JIT翻译完毕我在上JIT这辆**公交车**
+>
+> 2.下了公交车我再用解释器  **走两步**  等JIT翻译完毕我在上另一辆JIT**公交车**
+
+### 2.Exact VM （准确的VM）
+
+> 准确式内存管理虚拟机
+
+> 虚拟机可以知道内存中某个位置的数据具体是什么类型
+
+> JDK1.2时提供了该虚拟机 但并没有大规模使用
+
+> 具有现代虚拟机的
+>
+> **1.热点探测**（热点代码交给JIT）
+>
+> **2.编译器和解释器混合使用工作模式**
+
+后来被HotSpot替换
+
+### 3.HotSpot VM（热点代码探测技术）
+
+> 三大商用虚拟机之一
+
+> 从JDK1.3开始 HotSpot就成为了默认的虚拟机
+
+> 提供了 **方法区**
+
+![image-20210215131418775](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210215131418775.png)
+
+### 4.JRockit
+
+> 三大商用虚拟机之一 专注于服务器端应用 世界上最快的虚拟机
+
+> 不包含解释器  所有的代码全部依靠JIT 因为服务端不需要太高的启动速度
+
+> 后来甲骨文把JRockit整合到了HotSpot 但是由于架构相差很大 所以能整合的有限
+
+### 5.J9
+
+>三大商用虚拟机之一 专注于服务器端应用 世界上最快的虚拟机
+
+> 市场定位与HotSpot接近 号称最快的虚拟机  实际速度低于JRockit
+
+### 6.等等...
+
+## 四.类加载子系统
+
+> 负责从文件系统或者网络中以二进制流的方式加载.class文件 class文件在文件开头有特定的文件标识
+
+> 只负责class文件的加载 至于能否正常运行 取决于执行引擎
+
+加载的类信息被存到了**方法区** **方法区**内还会存储运行时常量池
+
+### 1.Loading（加载）
+
+(1).通过一个类的全限定名来获取定义此类的二进制字节流
+
+(2).将字节流所代表的静态储存结构转化为方法区的运行时数据结构
+
+(3).在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据访问入口
+
+### 2.Linking（链接）
+
+![image-20210215142257883](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210215142257883.png)
+
+#### (1).验证
+
+验证字节码文件是否合法
+
+#### (2).准备
+
+把类当中的静态变量赋值为默认值（零值） **final是例外的** final修饰的静态变量会在编译时赋值
+
+#### (2).解析
+
+类当中用到的打印输出等 转换为直接引用
+
+### 3.Initialization（初始化）
+
+![image-20210215143320986](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210215143320986.png)
+
+#### (1).clinit方法会把类变量初始化和静态代码块初始化合并到一起 如下
+
+```java
+private static int a = 1;
+static(){
+    a = 2;
+}
+ // 此时启动代码a=2 
+```
+
+> 在执行子类的clinit方法前 要保证父类clinit已经执行完毕
+
+#### (2).顺序执行
+
+```java
+static(){
+    number = 20;
+    // sout(number)  这是错误的 非法的前向引用
+}
+private static int number = 10;
+ // 此时number = 10；
+ // 原因是因为顺序执行 静态代码块在上 最终被覆盖掉了
+```
+
+#### (3).init方法
+
+就是构造器方法
+
+### 4.类加载器分类
+
+![image-20210215150840106](JVM.assets/image-20210215150840106.png)
+
+BootStrap Class Loader 是由C C++编写的
+
+User_Defined Class Loader 是由Java语言实现的
+
+```java
+/**
+ * @author 孙术强
+ * @date 2021/2/15 15:11
+ */
+public class Test {
+    public static void main(String[] args) {
+         // 获取系统类加载器
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        System.out.println(systemClassLoader);
+
+         // 获取其上层：扩展类加载器
+        ClassLoader extClassLoader = systemClassLoader.getParent();
+        System.out.println(extClassLoader);
+
+         // 获取其上层  获取不到！引导类加载器
+        ClassLoader bootstrapClassLoader = extClassLoader.getParent();
+        System.out.println(bootstrapClassLoader);
+
+         // 对于用户自定义类来说 发现使用的是系统类加载器
+        ClassLoader classLoader = Test.class.getClassLoader();
+        System.out.println(classLoader);
+
+        // 系统核心类库使用的是 引导类加载器
+        ClassLoader classLoader1 = String.class.getClassLoader();
+        System.out.println(classLoader1);
+    }
+}
+```
+

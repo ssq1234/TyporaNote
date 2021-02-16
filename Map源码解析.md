@@ -1205,13 +1205,11 @@ public class HashMap<K,V>
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
-
 /*
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
-
 package java.util.concurrent;
 import java.util.concurrent.locks.*;
 import java.util.*;
@@ -1220,7 +1218,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamField;
-
 /**
  * A hash table supporting full concurrency of retrievals and
  * adjustable expected concurrency for updates. This class obeys the
@@ -1465,9 +1462,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Gets the ith element of given table (if nonnull) with volatile
-     * read semantics. Note: This is manually integrated into a few
-     * performance-sensitive methods to reduce call overhead.
+     * 取数组2第i个位置的值
      */
     @SuppressWarnings("unchecked")
     static final <K,V> HashEntry<K,V> entryAt(HashEntry<K,V>[] tab, int i) {
@@ -1593,16 +1588,34 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             this.table = tab;
         }
 
+        /**
+         * 最终的put方法
+         * @param key
+         * @param hash
+         * @param value
+         * @param onlyIfAbsent
+         * @return
+         */
         final V put(K key, int hash, V value, boolean onlyIfAbsent) {
+             // 加锁 tryLock()
+             // （尝试加锁，如果获取到锁立刻返回true，获取不到立刻返回false，不会造成阻塞）
+             // lock()方法获取不到锁会阻塞 直到获取到锁才解除阻塞
+             // scanAndLockForPut在获取不到锁时执行 可以在线程等待的时候做一些与线程安全无关的事
+             // 比如提前创建对象
             HashEntry<K,V> node = tryLock() ? null :
                     scanAndLockForPut(key, hash, value);
             V oldValue;
             try {
                 HashEntry<K,V>[] tab = table;
+                 // 根据数组长度和hash值算出数组2下标
                 int index = (tab.length - 1) & hash;
+                 // 获取数组2下标i存的对象
                 HashEntry<K,V> first = entryAt(tab, index);
+                 // 遍历对象上的链表
                 for (HashEntry<K,V> e = first;;) {
+                     // 链表节点不为空
                     if (e != null) {
+                        // 如果发现key已经存在了 返回旧值 替换为新值
                         K k;
                         if ((k = e.key) == key ||
                                 (e.hash == hash && key.equals(k))) {
@@ -1615,31 +1628,36 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         }
                         e = e.next;
                     }
-                    else {
+                    else { // 如果节点为空
+                         // 向链表以头插法 插入新值 跳出循环
                         if (node != null)
                             node.setNext(first);
                         else
                             node = new HashEntry<K,V>(hash, key, value, first);
                         int c = count + 1;
                         if (c > threshold && tab.length < MAXIMUM_CAPACITY)
+                             // 扩容
                             rehash(node);
                         else
+                              // 不需要扩容 直接存元素
                             setEntryAt(tab, index, node);
                         ++modCount;
+                         // 更新元素个数
                         count = c;
                         oldValue = null;
                         break;
                     }
                 }
             } finally {
+                // 释放锁
                 unlock();
             }
+             // 返回旧值 或空
             return oldValue;
         }
 
         /**
-         * Doubles size of table and repacks entries, also adding the
-         * given node to new table
+         * 数组2扩容
          */
         @SuppressWarnings("unchecked")
         private void rehash(HashEntry<K,V> node) {
@@ -1704,12 +1722,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         }
 
         /**
-         * Scans for a node containing given key while trying to
-         * acquire lock, creating and returning one if not found. Upon
-         * return, guarantees that lock is held. UNlike in most
-         * methods, calls to method equals are not screened: Since
-         * traversal speed doesn't matter, we might as well help warm
-         * up the associated code and accesses as well.
+         * 在尝试获取锁的同时 key不存在就去创建对象 并返回 key存在返回空
          *
          * @return a new node if key not found, else null
          */

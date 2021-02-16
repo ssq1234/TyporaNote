@@ -96,7 +96,35 @@ mget user:name user:age		#可以用这种高阶操作获取对象值
 getset key value		#返回旧值存入新值 如果不存在旧值返回null
 ```
 
+## 三.List类型
 
+```bash
+lpush key one		#从左插值
+(integer) 1
+lpush key two
+(integer) 2
+lpush key three
+(integer) 3
+lrange key 0 -1		#正着进倒着出
+1) "three"
+2) "two"
+3) "one" 		
+rpush key 123		#从右插入值
+lpop key		#从左弹栈
+rpop key		#从右弹栈
+lindex key index		#获取从左  下标index的值
+llist key		#获取list长度
+lrem key 个数 值		#移除指定个数的指定值
+ltrim key index index		#截取index到index替换掉原来的list
+rpoplpush key other		#把key右弹出 弹出的值存到other里
+lset key index 值		#把list指定下标的值改变 如果不存在list会报错
+linsert key before 123 1		#在list 123值前插入一个值1
+linsert key after 123 1		#在list 123值后插入一个值1
+```
+
+> 本身其实是一个链表 所以向中间插值效率会略低
+
+> 可以作为消息中间件
 
 ## 三.事务
 

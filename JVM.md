@@ -150,6 +150,7 @@ User_Defined Class Loader 是由Java语言实现的
 
 ```java
 /**
+ * 获取加载器
  * @author 孙术强
  * @date 2021/2/15 15:11
  */
@@ -178,3 +179,66 @@ public class Test {
 }
 ```
 
+#### (1).BootStrap 启动类加载器/引导类加载器
+
+> 由C/C++实现 嵌套在JVM内部
+>
+> ==用来加载JAVA的核心类库==
+>
+> 并不继承至ClassLoader 没有父加载器
+>
+> 事扩展类加载器和应用程序加载器的父类加载器
+
+#### (2).Extension 扩展类加载器
+
+> 由Java编写 继承于ClassLoader
+>
+> 自定义的Jar放在jre/lib/ext子目录下 也会由扩展类加载器加载
+
+#### (3).AppClassLoader 应用程序类加载器 系统类加载器
+
+> 由Java编写 继承于ClassLoader
+>
+> 自己写的会由应用程序类加载器加载
+
+#### (4).自定义类加载器
+
+![image-20210217173129043](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210217173129043.png)
+
+### 5.ClassLoader
+
+> ClassLoader是一个抽象类 除了bootStrap类加载器 所有的类加载器都是直接继承或者间接继承自ClassLoader
+
+### 6.双亲委派机制
+
+> Java虚拟机对class文件采用的是按需加载模式  当需要使用到该类时才会进行加载
+>
+> 而加载类的方式就是双亲委派模式 即把请求交给父类处理
+>
+> 1.避免类的重复加载
+>
+> 2.保护核心API
+
+![image-20210217174835280](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210217174835280.png)
+
+==**反向委托**==
+
+> 现在要加载一个第三方的jar包 例如jdbc.jar 需要用到引导类加载器加载核心api加载rt.jar 也就是加载第三方jar包实现的接口
+>
+> 而具体的实现类jdbc就需要引导类加载器反向委托给系统类加载器
+
+### 7.类的主动使用和被动使用
+
+![image-20210217181350775](https://typora1-1304288279.cos.ap-beijing.myqcloud.com/image-20210217181350775.png)
+
+### 8.其他
+
+JVM判断两个类是不是同一个 
+
+1.首先类名和包名是一致的
+
+2.类加载器必须是一个
+
+在方法区内记录了类的加载器类型
+
+当解析一个类型到另一个类型的引用时，JVM需要保证两个类的类加载器是相同的

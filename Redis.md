@@ -77,6 +77,7 @@ type name
 ```bash
 set key value  #添加一条数据
 get key		#获取值
+del key		#删除值
 append key “hello”		#在字符串后追加字符
 strlen key		 #获取value长度
 insr key 		#数字自增
@@ -125,6 +126,74 @@ linsert key after 123 1		#在list 123值后插入一个值1
 > 本身其实是一个链表 所以向中间插值效率会略低
 
 > 可以作为消息中间件
+
+## 四.Set类型
+
+> 集合内元素不能够重复
+
+```bash
+sadd key value		#插入值
+smembers key		#查看集合内所有元素
+sismember key value		#查看集合内是否存在value
+scard key		#查看一共有多少个值
+srem key value		#移除集合中指定的元素
+srandmember key		#随机抽取一个值
+spop key		#随机弹出一个元素
+smove key1 key2 value		#将key1里的value移到key2
+sdiff key1 key2		#key1里有的 key2里没有的
+sinter key1 key2		#key1和key2交集
+sunion key1 key2		#key1和key2并集
+```
+
+## 五.Hash类型
+
+> 和String命令很像！
+
+key->{key:value}
+
+```bash
+hset key key value		#插入值
+hget key key		#取值
+hmset key key1 value1 key2 value2		#同时插入多值
+hmget key key1 key2		#取多个值
+hgetall key		#获取全部键值对
+hdel key key		#删除指定的key-value
+hlen key		#获取hash长度
+hexists key key1		#查看是否由指定的key1
+hkeys key		#获取key内所有的key
+hvals key		#获取所有的值
+hincrby key 大小		#指定数字增加多少
+hsetnx key key value		#存在就不插入 不存在才会插入值
+```
+
+## 六.Zset类型
+
+> 有序集合
+
+```bash
+在set的基础上加上了一个值
+zadd key 值 value		#添加value 他有个值
+zrange key 0 -1		#取出所有值
+127.0.0.1:6379> zadd a 2500 ssq
+(integer) 1
+127.0.0.1:6379> zadd a 25 ssq1
+(integer) 1
+127.0.0.1:6379> zadd a 251 ssq12
+(integer) 1
+127.0.0.1:6379> ZRANGEBYSCORE a -inf +inf		#按照值从小到大排序 -inf（负无穷）
+1) "ssq1"
+2) "ssq12"
+3) "ssq"
+ZRANGEBYSCORE a -inf +inf withscores		#值和value都从小到大排序
+ZRANGEBYSCORE a -inf 2500		#按照值从小到大排序 值在-inf（负无穷）到2500之内
+ZREVRANGE a 0 -1		#按照从大到小排序
+zrem key value		#移除一个元素
+zcard key		#查看一共多少个元素
+```
+
+## 七.Geospatial 地理位置
+
+
 
 ## 三.事务
 

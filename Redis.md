@@ -272,3 +272,93 @@ DISCARD
 >
 > ==此时无法保证原子性==
 
+## 十一.监控 实现乐观锁
+
+```bash
+127.0.0.1:6379> watch money		#监视money
+OK
+#开启一个线程执行一个关于money的事务
+127.0.0.1:6379> MULTI
+OK
+127.0.0.1:6379> DECRby money 10
+QUEUED
+127.0.0.1:6379> INCRby out 10
+QUEUED
+
+#当事务还没结束时 此时另外一个线程修改了money
+127.0.0.1:6379> get money
+"80"
+127.0.0.1:6379> set money 1000
+OK
+#原来的线程结束事务发现失败
+127.0.0.1:6379> exec
+(nil)
+#解除监视 重新监视 重新开启事务
+127.0.0.1:6379> unwatch
+OK
+127.0.0.1:6379> watch money
+OK
+127.0.0.1:6379> MULTI
+OK
+127.0.0.1:6379> DECRby money 10
+QUEUED
+127.0.0.1:6379> INCRBY money 10
+QUEUED
+127.0.0.1:6379> exec
+```
+
+## 十二.Jedis
+
+> 导入对应的依赖
+
+```xml
+<dependencies>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.62</version>
+        </dependency>
+</dependencies>
+```
+
+```java
+package com.cust;
+import com.alibaba.fastjson.JSONObject;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Transaction;
+/**
+ * @author 孙术强
+ * @date 2021/2/21 19:58
+ */
+public class TestPing {
+    public static void main(String[] args) {
+        Jedis jedis = new Jedis("sunshuqiang.top", 6379);
+        jedis.auth("123456");
+         // jedis所有指令 就是基本指令
+        System.out.println(jedis.ping());
+         // fastjson存入数据
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("hello",1);
+        jsonObject.put("hello1",2);
+        Transaction multi = jedis.multi();
+         // 开启事务
+        try {
+            multi.set("key",jsonObject.toJSONString());
+            multi.set("key1",jsonObject.toJSONString());
+            multi.exec();
+            System.out.println(jedis.get("key"));
+        } catch (Exception e) {
+            multi.discard();
+            e.printStackTrace();
+        } finally {
+            jedis.close();
+        }
+    }
+}
+```
+

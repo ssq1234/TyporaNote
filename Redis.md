@@ -362,3 +362,178 @@ public class TestPing {
 }
 ```
 
+## 十三.SpringBoot
+
+> SpringBoot中jedis被替换为了lettuce
+>
+> jedis是线程不安全的，如果想避免不安全就需要jedis pool连接池 更像BIO
+>
+> lettuce是线程安全的 采用netty在多个线程中进行共享 可以减少线程数据 更像NIO
+
+==通过操作ops选择操作类型操作redis 可以封装一个工具类==
+
+## 十四.配置文件conf
+
+### 1、单位
+
+```conf
+# 1k => 1000 bytes
+# 1kb => 1024 bytes
+# 1m => 1000000 bytes
+# 1mb => 1024*1024 bytes
+# 1g => 1000000000 bytes
+# 1gb => 1024*1024*1024 bytes
+```
+
+### 2、配置文件对大小写不敏感
+
+```conf
+# units are case insensitive so 1GB 1Gb 1gB are all the same.
+```
+
+### 3、可以包含其他的配置文件
+
+```conf
+# include /path/to/local.conf
+# include /path/to/other.conf
+```
+
+### 4、允许哪些ip远程访问
+
+```conf
+#bind 0.0.0.0  #允许所有ip访问
+```
+
+### 5、保护模式 只允许本地连接
+
+```conf
+protected-mode no
+```
+
+### 6、端口设置
+
+```conf
+port 6379
+```
+
+### 7、是否以守护进程运行
+
+```conf
+daemonize yes
+```
+
+### 8、后台运行时记录进程的pid文件位置
+
+```conf
+pidfile /var/run/redis_6379.pid
+```
+
+### 9、日志级别
+
+```conf
+# Specify the server verbosity level.
+# This can be one of:
+# debug (a lot of information, useful for development/testing)
+# verbose (many rarely useful info, but not a mess like the debug level)
+# notice (moderately verbose, what you want in production probably)
+# warning (only very important / critical messages are logged)
+loglevel notice
+```
+
+### 10、日志存储文件名
+
+```conf
+# Specify the log file name. Also the empty string can be used to force
+# Redis to log on the standard output. Note that if you use standard
+# output for logging but daemonize, logs will be sent to /dev/null
+logfile ""
+```
+
+### 11、数据库数量
+
+```conf
+databases 16
+```
+
+### 12、启动时是否显示logo
+
+```bash
+always-show-logo yes
+```
+
+### 13、持久化规则
+
+```conf
+save 900 1		#九百秒内如果至少有一个key进行过修改 就进行持久化
+save 300 10
+save 60 10000
+```
+
+### 14、持久化错误是否继续工作
+
+```conf
+stop-writes-on-bgsave-error yes
+```
+
+### 15、是否压缩RDB文件
+
+```conf
+rdbcompression yes		#需要消耗cpu资源
+```
+
+### 16、保存RDB文件进行错误检查校验
+
+```conf
+rdbchecksum yes
+```
+
+### 17、RDB文件保存目录
+
+```conf
+dir ./
+```
+
+### 18、设置密码
+
+```conf
+requirepass 123456
+```
+
+### 19、最大客户端连接数量
+
+```conf
+# maxclients 10000
+```
+
+### 20、配置最大内存容量
+
+```conf
+# maxmemory <bytes>
+```
+
+### 21、内存到达上限处理策略
+
+```conf
+# maxmemory-policy noeviction
+```
+
+### 22、是否开启AOF
+
+```conf
+appendonly no
+```
+
+### 23、持久化文件名字
+
+```conf
+appendfilename "appendonly.aof"
+```
+
+### 24、AOF同步策略
+
+```conf
+# appendfsync always	#总是
+appendfsync everysec  #每秒
+# appendfsync no	#不同步 操作系统自己执行同步 速度最快
+```
+

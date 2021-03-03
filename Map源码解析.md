@@ -2810,3 +2810,14 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
 
 ```
 
+# 二.JDK1.8
+
+==红黑树==
+
+> 红黑树必须满足的条件
+
+![image-20210226133549687](Map源码解析.assets/image-20210226133549687.png)
+
+> 插入新节点如何处理红黑树使其满足定义
+
+![image-20210226133530906](Map源码解析.assets/image-20210226133530906.png)

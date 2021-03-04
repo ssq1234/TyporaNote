@@ -282,3 +282,34 @@ Java虚拟机的线程和操作系统的线程是一一对应，是映射关系
 ==并行==：多个核来执行多个线程、多个线程是一起走的
 
 ==并发==：一个核通过上下文切换执行多个线程
+
+### 3.虚拟机栈
+
+> 虚拟机栈是线程私有的 内部保存着一个个的栈帧 （对应着一个个的方法）它的生命周期和线程的生命周期是一致的
+
+==访问速度仅次于程序计数器，对于栈来说没有垃圾回收，但会抛出异常==
+
+· 虚拟机栈容量不足时会抛出StackOverflowError异常
+
+· 如果虚拟机栈可以动态扩展 如果内存不足 会抛出OutofMemoryError异常
+
+```
+-Xss size  设置虚拟机栈容量大小（参数调优）
+```
+
+Sets the thread stack size (in bytes). Append the letter `k` or `K` to indicate KB, `m` or `M` to indicate MB, and `g` or `G` to indicate GB. The default value depends on the platform:
+
+- Linux/x64 (64-bit): 1024 KB
+- macOS (64-bit): 1024 KB
+- Oracle Solaris/x64 (64-bit): 1024 KB
+- Windows: The default value depends on virtual memory
+
+The following examples set the thread stack size to 1024 KB in different units:
+
+```
+Copy-Xss1m
+-Xss1024k
+-Xss1048576
+```
+
+This option is similar to `-XX:ThreadStackSize`.
